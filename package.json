@@ -1,0 +1,19 @@
+{
+  "name": "cineplex-nj",
+  "version": "1.0.0",
+  "description": "cineplex",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.13.3",
+    "jade": "^1.11.0",
+    "moment": "^2.10.6",
+    "mongoose": "^4.1.11"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "tuilu",
+  "license": "ISC"
+}
