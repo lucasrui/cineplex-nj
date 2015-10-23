@@ -7,7 +7,13 @@ var Movie = require('./models/movie');
 var port  = process.env.PORT || 3000;
 var app = express();
 
-mongoose.connect('mongodb://localhost/cineplex');
+mongoose.connect('mongodb://localhost/cineplex'); //连接数据库
+
+var db = mongoose.connection; //创建一个数据库连接
+db.on('error',console.error.bind(console,'连接错误:'));
+db.once('open',function(){
+  console.log('connected');
+});
 
 app.set('views','./views/pages');
 app.set('view engine','jade');
@@ -74,12 +80,15 @@ app.get('/admin/update/:id', function(req, res) {
 	}
 })
 //admin post movie
-app.post('/admin/movie/new', function(res, req) {
-	console.log(res.body);
-	var movieObj = req.body.movie;
-	if(!movieObj)console.log(req);
-	var id = req.body.movie._id;
-	var _movie
+app.post('/admin/movie/new', function(req, res) {
+	var movieObj = {
+		_id : req.body.movie_id,
+		title : req.body.movie_title,
+		doctor : req.body.movie_doctor
+	}
+	if(!movieObj)console.log(req.body.movie);
+	var id = req.body.movie_id;
+	var _movie;
 	if(id !== 'undefined') {
 		Movie.findById(id, function(err, movie) {
 			if(err) {
@@ -132,7 +141,7 @@ app.get('/admin/list', function(req, res) {
 		if(err) {
 			console.log(err);
 		}
-		res.render('lsit', {
+		res.render('list', {
 			title: 'cineplex 列表页',
 			movies: movies
 		})
