@@ -1,13 +1,21 @@
 var express = require('express');
 var path  = require('path');
 var bodyParser  = require('body-parser');
+var cookieParser  = require('cookie-parser');
+var session = require('express-session');
+var mongoStore = require('connect-mongo')(session);
 var mongoose = require('mongoose');
 var _ = require('underscore');
+
 var Movie = require('./models/movie');
+var User = require('./models/user');
+var util = require('./public/libs/util');
+
 var port  = process.env.PORT || 3000;
 var app = express();
 
-mongoose.connect('mongodb://localhost/cineplex'); //连接数据库
+var dbUrl = 'mongodb://localhost/cineplex';
+mongoose.connect(dbUrl); //连接数据库
 
 var db = mongoose.connection; //创建一个数据库连接
 db.on('error',console.error.bind(console,'连接错误:'));
@@ -15,12 +23,21 @@ db.once('open',function(){
   console.log('connected');
 });
 
+app.locals.moment = require('moment');
+
 app.set('views','./views/pages');
 app.set('view engine','jade');
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({ extended: false }));
-// app.use(bodyParser());
 
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // true可解析body为中数据为user[xx]为对象user
+app.use(cookieParser());
+app.use(session({
+	secret: 'cineplex',
+	store: new mongoStore({
+		url: dbUrl,
+		collection: 'sessions'
+    })
+}))
 app.use(express.static(path.join(__dirname, 'bower_components')))
 
 app.listen(port);
@@ -29,6 +46,12 @@ console.log('cineplex started on prot ' + port);
 
 //index page
 app.get('/', function(req, res) {
+	console.log('session info');
+	console.log(req.session.user);
+	var _user = req.session.user;
+	if(_user) {
+		app.locals.user = _user;
+	}
 	Movie.fetch(function(err,movies) {
 		if(err) {
 			console.log(err);
@@ -55,6 +78,76 @@ app.get('/', function(req, res) {
 		poster: 'http://img.mukewang.com/533e4ce900010ae802000200-100-100.jpg'
 	}]
 })*/
+})
+
+// signup
+app.post('/user/signup', function(req, res) {
+	var _user = req.body.user;
+	console.log(req.body.user);
+	
+	User.find({name: _user.name}, function(err, user) {
+		if(err) {
+			console.log(err);
+		}
+
+		if(user) {
+			return res.redirect('/');
+		}else {
+			var user = new User(_user);
+			user.save(function(err, user) {
+				if (err) {
+					console.log(err);
+				}
+				res.redirect('/');
+			})
+		}
+	})
+})
+
+// signin
+app.post('/user/signin', function(req, res) {
+	var _user = req.body.user;
+	console.log(req.body.user);
+	var password=_user.password;
+
+	User.findOne({name: _user.name}, function(err, user) {
+		if(err) {
+			console.log(err);
+		}
+
+		if(!user) {
+			console.log('there is no such user');
+			return res.redirect('/');
+		}
+		user.comparePassword(password, function(err, isMatch) {
+			if (isMatch) {
+				req.session.user = user;
+				return res.redirect('/');
+			}else {
+				console.log('password is not matched');
+			}
+		})
+	})
+});
+
+// logout
+app.get('/logout', function(req, res) {
+	delete req.session.user;
+	delete app.locals.user;
+	res.redirect('/');
+})
+
+// userlist page
+app.get('/admin/userlist', function(req, res) {
+	User.fetch(function(err,users) {
+		if(err) {
+			console.log(err);
+		}
+		res.render('userlist', {
+			title: 'cineplex 列表页',
+			users: users
+		})
+	})
 })
 
 //detail page

@@ -3,6 +3,7 @@ var mongoose = require('mongoose');
 var MovieSchema = new mongoose.Schema({
 	doctor:String,
 	title:String,
+	poster:String,
 	language:String,
 	meta: {
 		createAt:{
