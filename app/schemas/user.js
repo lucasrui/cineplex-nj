@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var util = require('../public/libs/util');
+var util = require('../../public/libs/util');
 var SALT_WORK_FACTOR = 10;
 
 var UserSchema = new mongoose.Schema({
