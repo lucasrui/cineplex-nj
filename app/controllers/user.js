@@ -16,7 +16,7 @@ exports.signup = function(req, res) {
 
 		if(user) {
 			console.log('same user name');
-			return res.redirect('/');
+			return res.redirect('/signin');
 		}else {
 			var user = new User(_user);
 			user.save(function(err, user) {
@@ -49,7 +49,7 @@ exports.signin = function(req, res) {
 		console.log(user);
 		if(!user) {
 			console.log('there is no such user');
-			return res.redirect('/');
+			return res.redirect('/signup');
 		}
 		user.comparePassword(password, function(err, isMatch) {
 			if (isMatch) {
@@ -57,6 +57,7 @@ exports.signin = function(req, res) {
 				return res.redirect('/');
 			}else {
 				console.log('password is not matched');
+				return res.redirect('/signin');
 			}
 		});
 	});
@@ -70,15 +71,21 @@ exports.logout = function(req, res) {
 
 // userlist page
 exports.list = function(req, res) {
-	User.fetch(function(err,users) {
-		if(err) {
-			console.log(err);
-		}
-		res.render('userlist', {
-			title: 'cineplex 列表页',
-			users: users
+	var user = req.session.user;
+	if(!user) {
+		return res.redirect('/signin');
+	}
+	if(user.role > 10) {
+		User.fetch(function(err,users) {
+			if(err) {
+				console.log(err);
+			}
+			res.render('userlist', {
+				title: 'cineplex 列表页',
+				users: users
+			});
 		});
-	});
+	}
 }
 
 // userlist delete

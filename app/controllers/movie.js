@@ -6,7 +6,7 @@ exports.new = function(req, res) {
 	res.render('admin', {
 		title: 'cineplex 后台',
 		movie: {
-			title: 'aa',
+			title: '',
 			doctor: ''/*,
 			country: '',
 			year: '',
