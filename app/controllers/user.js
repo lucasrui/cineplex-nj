@@ -71,21 +71,15 @@ exports.logout = function(req, res) {
 
 // userlist page
 exports.list = function(req, res) {
-	var user = req.session.user;
-	if(!user) {
-		return res.redirect('/signin');
-	}
-	if(user.role > 10) {
-		User.fetch(function(err,users) {
-			if(err) {
-				console.log(err);
-			}
-			res.render('userlist', {
-				title: 'cineplex 列表页',
-				users: users
-			});
+	User.fetch(function(err,users) {
+		if(err) {
+			console.log(err);
+		}
+		res.render('userlist', {
+			title: 'cineplex 列表页',
+			users: users
 		});
-	}
+	});
 }
 
 // userlist delete
@@ -102,4 +96,22 @@ exports.del = function(req, res) {
 			}
 		})
 	}
+}
+// check isSignin
+exports.isSignin = function(req, res, next) {
+	var user = req.session.user;
+	if(!user) {
+		return res.redirect('/signin');
+	}
+
+	next();
+}
+// check isAdmin
+exports.isAdmin = function(req, res, next) {
+	var user = req.session.user;
+	if(user && user.role < 10) {
+		return res.redirect('/signin');
+	}
+
+	next();
 }

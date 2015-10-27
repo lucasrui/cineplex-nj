@@ -22,14 +22,14 @@ module.exports = function(app){
 	app.get('/signin', User.showSignin);
 	app.get('/signup', User.showSignup);
 	app.get('/logout', User.logout);
-	app.get('/admin/userlist', User.list);
+	app.get('/admin/userlist', User.isSignin, User.isAdmin, User.list);
 	app.delete('/admin/userlist', User.del);
 
 	//movie
-	app.get('/admin/movie', Movie.new);
+	app.get('/admin/movie', User.isSignin, User.isAdmin, Movie.new);
 	app.get('/movie/:id', Movie.detail);
-	app.get('/admin/update/:id', Movie.update);
-	app.post('/admin/movie/new', Movie.save);
-	app.get('/admin/list', Movie.list);
-	app.delete('/admin/list', Movie.del);
+	app.get('/admin/movieupdate/:id', User.isSignin, User.isAdmin, Movie.update);
+	app.post('/admin/movie/new', User.isSignin, User.isAdmin, Movie.save);
+	app.get('/admin/movielist', User.isSignin, User.isAdmin, Movie.list);
+	app.delete('/admin/list', User.isSignin, User.isAdmin, Movie.del);
 }

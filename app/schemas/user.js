@@ -12,7 +12,7 @@ var UserSchema = new mongoose.Schema({
 	role: {
 		type: Number,
 		default: 0
-	}
+	},
 	meta: {
 		createAt:{
 			type: Date,
